@@ -82,7 +82,7 @@ console.log("id", thread_id)
 
           }
           else if (messages.length > 2){
-             const res =await api.put("/message",  {messages, thread_id, chatId})
+             const res =await api.patch("/message",  {messages, thread_id, chatId})
             console.log("updated", res);
           }
 
