@@ -7,6 +7,7 @@ import WelcomePage from './pages/Welcome'
 import ChatPage from './pages/Messages'
 import NebulaLoader from './components/Loader'
 import { useEffect } from 'react'
+import Chats from './pages/Chats'
 
 
 function PrivateRoute({ children }) {
@@ -35,6 +36,9 @@ function App() {
               </PrivateRoute>
             } 
           />
+
+          <Route path="/chat/:id" element={<Chats/>} />
+
         </Routes>
       </AuthProvider>
     

@@ -36,7 +36,7 @@ export default function LoginPage() {
       alert(error)
     }
   }
-/*useEffect(()=>{
+useEffect(()=>{
 
 
 function nav(){
@@ -56,7 +56,7 @@ if(user){
 
 nav()
 
-},[status])*/
+},[status])
 
 
 
@@ -103,7 +103,7 @@ nav()
             type="submit"
             className="w-full py-3 mt-4 bg-black hover:bg-gray-900 text-white font-medium rounded-xl transition"
           >
-            Register
+            Login
           </button>
         </form>
 
@@ -113,11 +113,11 @@ nav()
             href="/register" 
             className="text-black font-medium hover:underline"
           >
-          Login Here
+          Register Here
           </a>
          
         </p>
-         <p>{error && error}</p>
+         <p className="text-red-600 text-sm text-center font-light py-2">{error && error}</p>
       </div>
     </div>
   );

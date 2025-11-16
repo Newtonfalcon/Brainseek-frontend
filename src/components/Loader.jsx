@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
 
 export default function NebulaLoader() {
+
+
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div className=" fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div className="relative flex items-center justify-center">
         {/* Outer glow */}
         <motion.div
@@ -46,7 +49,7 @@ export default function NebulaLoader() {
           }}
         />
 
-        <p className="-ml-10 font-bold text-xl text-black z-6">Loading...</p>
+        <p className="-ml-10 font-display  text-white/90 z-1 text-sm opacity-60 ">Loading...</p>
       </div>
     </div>
   );

@@ -24,10 +24,10 @@ export const AuthProvider = ({children})=> {
         setStatus("pending")
         const res = await api.get("/auth/user")  // ✅ Using api instance
         setUser(res.data)
-        setStatus("success")  // ✅ Fixed typo: "sucess" -> "success"
+        setStatus("success") 
       } catch (error) {
         setUser(null)
-        setError(error)
+        //setError(error.response?.data?.message || error.message)
         setStatus("not authenticated")
       }
     }
@@ -51,18 +51,25 @@ export const AuthProvider = ({children})=> {
   }
 
   const login = async (email, password)=>{
+    setError("")
     try {
+      setError("")
       setStatus("pending")
       const res = await api.post('/auth/login', {
         email, 
         password
       })
+
+      
+
       setUser(res.data)
       setStatus("success")
     } catch (error) {
-      setStatus("error")
-      setError(error.response?.data?.message || error.message)
-      throw error
+      setStatus("failed to login")
+     const errorMsg = error.response?.data?.message 
+        || error.response?.data?.error 
+        || 'Login failed';
+      setError(errorMsg);
     }
   }
 

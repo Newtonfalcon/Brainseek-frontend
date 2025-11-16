@@ -1,8 +1,15 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Orbitron:wght@400..900&display=swap');
+
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+@theme{
+  --font-display: "Orbitron", sans-serif;
+  --font-poppin: "Montserrat", sans-serif;
 }
 
 @theme inline {

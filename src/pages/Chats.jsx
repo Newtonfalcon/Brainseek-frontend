@@ -6,33 +6,30 @@ import axios from "axios";
 import { Menu, Copy, Send } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useChat } from "../context/Chatcontext";
-import {v4  as uuidv4} from 'uuid';
+import { useParams } from "react-router";
 
 
-const thread_id = uuidv4();
+
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
-  baseURL: '/api',  
+  baseURL: '/api',  // Same IP as backend!
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-export default  function ChatPage() {
+export default function Chats() {
+
+  const { id } = useParams();
+
+
   const {createChat} = useChat()
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
- 
   const chatEndRef = useRef(null);
-
-  const {currentId} = useChat();
-  
-  const chatId = currentId;
-    
-  
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,50 +43,28 @@ export default  function ChatPage() {
     const userMsg = { role: "user", content: input };
    
     setMessages((prev) => [...prev, userMsg]);
-     if (messages.length <= 1 || messages.length == 2){
-      const title = input
-     const check =  createChat(title);
-      console.log("chat created", check);
-     }
+     if (messages.length === 0) {
+      await createChat(input.slice(0, 20) || "New Chat");
 
 
+    }
     setInput("");
     setLoading(true);
 
     try {
-      const res = await api.post("/", {  
+      const res = await api.post("/", {  // ✅ Using api instance
         prompt: input,
-        thread_id
+        thread_id: 14,
       });
 
-console.log("id", thread_id)
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: res.data || "⚠️ No response received." },
       ]);
 
-     
-
-        if (messages){
-          if( messages.length <= 2 && messages.length !=0){
-            
-            
-            const res =await api.post("/message",  {messages, thread_id, chatId})
-            
-          
-            console.log("here", res);
-            
-
-          }
-          else if (messages.length > 2){
-             const res =await api.put("/message",  {messages, thread_id, chatId})
-            console.log("updated", res);
-          }
-
-      
-        
-      }
-    
+       
+        const test = await api.post(`/message/${id}`, {messages, thread_id:14})
+        console.log("Message logged:", test.data);
     } catch (err) {
       console.error("API Error:", err);
       setMessages((prev) => [
