@@ -11,7 +11,7 @@ const thread_id = uuidv4();
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
-  baseURL: '/api',  
+  baseURL: 'https://brainseekapi.vercel.app/',  
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'

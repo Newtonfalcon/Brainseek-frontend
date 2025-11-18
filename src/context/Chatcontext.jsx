@@ -3,7 +3,7 @@ import {createContext, useContext, useState, useEffect} from 'react'
 
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://brainseekapi.vercel.app/',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
