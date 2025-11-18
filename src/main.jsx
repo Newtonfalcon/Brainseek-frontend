@@ -4,7 +4,6 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/Authcontext.jsx'
 import { BrowserRouter } from 'react-router'
-import ChatPage from './pages/Messages.jsx'
 import { ChatProvider } from './context/Chatcontext.jsx'
 
 createRoot(document.getElementById('root')).render(

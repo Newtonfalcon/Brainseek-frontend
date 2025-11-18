@@ -1,10 +1,9 @@
-import React,{useState} from 'react'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, MessageCircle } from 'lucide-react'
 import {motion} from 'framer-motion'
 import { useChat } from '../context/Chatcontext';
-import { Link } from 'react-router';
 import { useAuth } from '../context/Authcontext';
-import { useEffect } from 'react';
+import { useState } from 'react';
+
 
 
 
@@ -12,7 +11,13 @@ function Navbar() {
       const {titles} = useChat();
 
 
+
       const {user, logout} = useAuth();
+      function shortUsername(name){
+            if(!name) return "Us";
+            if(name.length <=2) return name;
+            return name.slice(0,2)
+      }
       
       function handleLogout() {
             logout();
@@ -36,26 +41,26 @@ function Navbar() {
              {!isOpen? <Menu size={22} />: <X size={22} />}
             </motion.button>
             <h1 className="text-lg text-slate-700 font-semibold tracking-tight">BrainSeek</h1>
-            <div>{""}</div>
+            <div className='text-green-700'><a href="/message"> <MessageCircle size={24}/> </a></div>
 
             
           </header>
-      {isOpen && <motion.div className='w-[80%] bg-gray-50 p-3 h-screen fixed top-15 left-0 z-20 shadow-lg '
+      {isOpen && <motion.div className='w-[80%] bg-gray-50 p-3 h-screen fixed top-12 left-0 z-20 shadow-lg '
             animate={{ x: 0 }}
             initial={{ x: -300 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
             
-            <ul>
-                  <div className='flex flex-row gap-4 justify-between px-4 pb-5 text-gray-900 text-center items-center'
-                   > <div/> <LogOut size={20} onClick={handleLogout}/></div>
+            <ul className='mt-5 flex overflow-y-auto flex-col h-[90%] pb-10 '>
+                  <div className='flex flex-row  gap-4 justify-between px-4   mb-7 text-gray-900 text-center items-center'
+                   ><p className='animate-pulse text-white bg-black rounded-full p-2'>{shortUsername(user.name)}</p> <div/> <LogOut size={24} onClick={handleLogout} /></div>
                   {titles && titles.map((title, index) => (
-                        <Link key={index} className='flex flex-row text-gray-800 font-poppin py-2 px-3 bg-gray-100  rounded-md mb-2 text-sm hover:bg-gray-100 cursor-pointer'
-                        to={`/chat/${title?._id}`}
+                        <a key={index} className='flex flex-row text-gray-800 font-poppin font-bold py-2 px-3 bg-gray-100  rounded-md mb-2 text-sm hover:bg-gray-100 cursor-pointer'
+                        href={`/chat/${title?._id}`}
                         >
-                              {title?.title}
+                             {index + 1}. {title?.title}
                         
-                        </Link>
+                        </a>
                   ))}
             </ul>
                   

@@ -1,35 +1,63 @@
-
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import axios from "axios";
 import { Menu, Copy, Send } from "lucide-react";
 import Navbar from "../components/Navbar";
-import { useChat } from "../context/Chatcontext";
 import { useParams } from "react-router";
-
-
-
+import {v4 as uuidv4} from 'uuid';
+const thread_id = uuidv4();
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
-  baseURL: '/api',  // Same IP as backend!
+  baseURL: '/api',  
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-export default function Chats() {
-
-  const { id } = useParams();
-
-
-  const {createChat} = useChat()
+export default function ChatPage() {
+  const [prevchatlength, setPrevchatlength] = useState(0);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [threadId, setThreadId] = useState(null); // ✅ Local state for chatId
+  
   const chatEndRef = useRef(null);
+
+const {id} = useParams();
+
+    
+  useEffect(() => {
+   
+
+    function fetchMessages() {
+      api.get(`/message/${id}`)
+        .then(res => {
+          if (res.data && res.data.length > 0) {
+             
+            
+             setMessages(res.data[0].messages);
+             setThreadId(res.data[0].thread_id);
+             
+              setPrevchatlength(res.data[0].messages.length);
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching messages:", err);
+        });
+    }
+
+    
+      fetchMessages();
+    
+  }, []);
+
+
+
+
+ 
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,28 +71,36 @@ export default function Chats() {
     const userMsg = { role: "user", content: input };
    
     setMessages((prev) => [...prev, userMsg]);
-     if (messages.length === 0) {
-      await createChat(input.slice(0, 20) || "New Chat");
-
-
-    }
+    
+   
     setInput("");
     setLoading(true);
 
     try {
-      const res = await api.post("/", {  // ✅ Using api instance
+      const res = await api.post("/", {  
         prompt: input,
-        thread_id: 14,
+        thread_id: threadId
       });
 
+      
+      
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: res.data || "⚠️ No response received." },
       ]);
 
-       
-        const test = await api.post(`/message/${id}`, {messages, thread_id:14})
-        console.log("Message logged:", test.data);
+      
+      if (messages.length > prevchatlength) {
+        const saveRes = await api.patch("message", {
+          messages: [...messages, userMsg, { role: "assistant", content: res.data }],
+          thread_id,
+          chatId: id
+        });
+
+
+      }
+     
+      
     } catch (err) {
       console.error("API Error:", err);
       setMessages((prev) => [

@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const {register, user, status} = useAuth()
+  const {register, user, status, error} = useAuth()
 
   const handleSubmit =  (e) => {
 
@@ -58,7 +58,7 @@ nav()
 
 },[status])
 
-console.log(user)
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white text-black px-4">
@@ -125,6 +125,8 @@ console.log(user)
           </a>
           {user && user.name}
         </p>
+         <p className="text-red-600 text-sm text-center font-light py-2">{error && error}</p>
+      
       </div>
     </div>
   );

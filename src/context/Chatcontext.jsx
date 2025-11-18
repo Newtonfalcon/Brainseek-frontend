@@ -44,9 +44,10 @@ export const ChatProvider = ({children})=> {
         title
       })
 
-      console.log(res)
+
 
       setCurrentId(res?.data._id)
+      
 
     } catch (error) {
       throw new Error(error.response?.data?.message || error.message)

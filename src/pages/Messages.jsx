@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -6,8 +5,7 @@ import axios from "axios";
 import { Menu, Copy, Send } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useChat } from "../context/Chatcontext";
-import {v4  as uuidv4} from 'uuid';
-
+import { v4 as uuidv4 } from 'uuid';
 
 const thread_id = uuidv4();
 
@@ -20,19 +18,21 @@ const api = axios.create({
   }
 });
 
-export default  function ChatPage() {
-  const {createChat} = useChat()
+export default function ChatPage() {
+  const {createChat, currentId} = useChat()
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
- 
+  const [chatId, setChatId] = useState(null); // ✅ Local state for chatId
+  
   const chatEndRef = useRef(null);
 
-  const {currentId} = useChat();
-  
-  const chatId = currentId;
-    
-  
+  // ✅ Update chatId when currentId changes
+  useEffect(() => {
+    if (currentId) {
+      setChatId(currentId);
+    }
+  }, [currentId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,12 +46,13 @@ export default  function ChatPage() {
     const userMsg = { role: "user", content: input };
    
     setMessages((prev) => [...prev, userMsg]);
-     if (messages.length <= 1 || messages.length == 2){
-      const title = input
-     const check =  createChat(title);
-      console.log("chat created", check);
-     }
+    
+    
+    if (messages.length == 0) {
+      const title = input.slice(0, 30) || "New Chat";
+      await createChat(title);
 
+    }
 
     setInput("");
     setLoading(true);
@@ -62,34 +63,39 @@ export default  function ChatPage() {
         thread_id
       });
 
-console.log("id", thread_id)
+
+      
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: res.data || "⚠️ No response received." },
       ]);
 
-     
-
-        if (messages){
-          if( messages.length <= 2 && messages.length !=0){
-            
-            
-            const res =await api.post("/message",  {messages, thread_id, chatId})
-            
-          
-            console.log("here", res);
-            
-
-          }
-          else if (messages.length > 2){
-             const res =await api.patch("/message",  {messages, thread_id, chatId})
-            console.log("updated", res);
-          }
-
-      
+      // ✅ Save messages AFTER getting response
+      if (messages.length > 0) {
+        // ✅ Use the chatId from state or currentId
+        const activeChatId = chatId || currentId;
         
+        if (!activeChatId) {
+          console.error("❌ No chatId available!");
+          return;
+        }
+
+        if (messages.length <= 2) {
+          const saveRes = await api.post("/message", {
+            messages: [...messages, userMsg, { role: "assistant", content: res.data }],
+            thread_id,
+            chatId: activeChatId
+          });
+
+        } else {
+          const updateRes = await api.patch("/message", {
+            messages: [...messages, userMsg, { role: "assistant", content: res.data }],
+            thread_id,
+            chatId: activeChatId
+          });
+
+        }
       }
-    
     } catch (err) {
       console.error("API Error:", err);
       setMessages((prev) => [
@@ -135,7 +141,7 @@ console.log("id", thread_id)
                 {msg.role === "assistant" && (
                   <button
                     onClick={() => copyText(msg.content)}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-5"
                   >
                     <Copy size={14} />
                   </button>
