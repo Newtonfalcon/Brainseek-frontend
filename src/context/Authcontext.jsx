@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 // ✅ Configure axios defaults BEFORE creating instance
 const api = axios.create({
-  baseURL: 'https://brainseekapi.vercel.app/',
+  baseURL: 'https://brainseekapi.vercel.app/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
