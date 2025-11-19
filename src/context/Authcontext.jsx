@@ -1,8 +1,8 @@
-"use client"
+
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
-// ✅ Configure axios defaults BEFORE creating instance
+
 const api = axios.create({
   baseURL: 'https://brainseekapi.vercel.app/api',
   withCredentials: true,
