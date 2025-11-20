@@ -36,8 +36,10 @@ export const AuthProvider = ({children})=> {
 
   const register = async (name, email, password)=>{
     setStatus("pending")
+    setError("")
     try {
       setStatus("pending")
+
       const res = await api.post('/auth/register', {
         name, 
         email, 
@@ -76,6 +78,7 @@ export const AuthProvider = ({children})=> {
   }
 
   const logout = async ()=>{
+    
     try {
       await api.post('/auth/logout')
       setUser(null)
