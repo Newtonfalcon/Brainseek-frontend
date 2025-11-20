@@ -35,6 +35,7 @@ export const AuthProvider = ({children})=> {
   },[])
 
   const register = async (name, email, password)=>{
+    setStatus("pending")
     try {
       setStatus("pending")
       const res = await api.post('/auth/register', {
@@ -52,6 +53,7 @@ export const AuthProvider = ({children})=> {
 
   const login = async (email, password)=>{
     setError("")
+    setStatus("pending")
     try {
       setError("")
       setStatus("pending")
