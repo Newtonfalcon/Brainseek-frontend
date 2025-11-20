@@ -103,7 +103,7 @@ nav()
             type="submit"
             className="w-full py-3 mt-4 bg-black hover:bg-gray-900 text-white font-medium rounded-xl transition"
           >
-            Login
+            {status === "pending" ? "Logging in..." : "Login"}
           </button>
         </form>
 

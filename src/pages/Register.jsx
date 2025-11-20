@@ -111,7 +111,7 @@ nav()
             type="submit"
             className="w-full py-3 mt-4 bg-black hover:bg-gray-900 text-white font-medium rounded-xl transition"
           >
-            Register
+            {status === "pending" ? "Creating Account..." : "Register"}
           </button>
         </form>
 
