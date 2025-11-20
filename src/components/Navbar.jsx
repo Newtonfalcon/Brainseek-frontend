@@ -53,7 +53,7 @@ function Navbar() {
             
             <ul className='mt-5 flex overflow-y-auto flex-col h-[90%] pb-10 '>
                   <div className='flex flex-row  gap-4 justify-between px-4   mb-7 text-gray-900 text-center items-center'
-                   ><p className='animate-pulse text-white bg-black rounded-full p-2'>{shortUsername(user.name)}</p> <div/> <LogOut size={24} onClick={handleLogout()} /></div>
+                   ><p className='animate-pulse text-white bg-black rounded-full p-2'>{shortUsername(user.name)}</p> <div/> <LogOut size={24} onClick={handleLogout} /></div>
                   {titles && titles.map((title, index) => (
                         <a key={index} className='flex flex-row text-gray-800 font-poppin font-bold py-2 px-3 bg-gray-100  rounded-md mb-2 text-sm hover:bg-gray-100 cursor-pointer'
                         href={`/chat/${title?._id}`}
