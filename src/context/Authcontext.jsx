@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const api = axios.create({
   baseURL: 'https://brainseekapi.vercel.app/api',
-  withCredentials: true, // crucial for iOS
+  withCredentials: true, // crucial for iOS Safari + cookies
   headers: {
     'Content-Type': 'application/json'
   }
@@ -13,26 +13,36 @@ export const Authcontext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [status, setStatus] = useState("pending"); // "pending" | "authenticated" | "not authenticated" | "error"
+  const [status, setStatus] = useState("pending"); // pending | authenticated | not authenticated | error
   const [error, setError] = useState("");
 
-  // Fetch current user on mount
+  // useEffect: fetch current user
   useEffect(() => {
+    let ignore = false; // flag to prevent stale async overwrites
+
     const getUser = async () => {
-      setStatus("pending");
       try {
+        setStatus("pending");
         const res = await api.get("/auth/user");
-        setUser(res.data);
-        setStatus("authenticated");
+        if (!ignore) {
+          setUser(res.data);
+          setStatus("authenticated");
+        }
       } catch (err) {
-        setUser(null);
-        setError(err.response?.data?.message || err.message);
-        setStatus("not authenticated");
+        if (!ignore) {
+          setUser(null);
+          setError(err.response?.data?.message || err.message);
+          setStatus("not authenticated");
+        }
       }
     };
+
     getUser();
+
+    return () => { ignore = true }; // cleanup on unmount
   }, []);
 
+  // Register
   const register = async (name, email, password) => {
     setStatus("pending");
     setError("");
@@ -46,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login
   const login = async (email, password) => {
     setStatus("pending");
     setError("");
@@ -59,17 +70,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout
   const logout = async () => {
-   
-  setUser(null);             // immediately clear user state
-  setStatus("not authenticated"); // mark user as logged out
-  try {
-    await api.post('/auth/logout'); // async cookie clearing
-  } catch (err) {
-    console.error("Logout failed:", err);
-  
-    };
+    // Immediately clear state so UI updates instantly
+    setUser(null);
+    setStatus("not authenticated");
+    setError("");
 
+    try {
+      // Call backend to destroy cookie
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   const value = { user, status, error, register, login, logout };
