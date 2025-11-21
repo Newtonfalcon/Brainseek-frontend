@@ -60,13 +60,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-      setUser(null);
-      setStatus("not authenticated");
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
-    }
+   
+  setUser(null);             // immediately clear user state
+  setStatus("not authenticated"); // mark user as logged out
+  try {
+    await api.post('/auth/logout'); // async cookie clearing
+  } catch (err) {
+    console.error("Logout failed:", err);
+  
+    };
+
   };
 
   const value = { user, status, error, register, login, logout };
