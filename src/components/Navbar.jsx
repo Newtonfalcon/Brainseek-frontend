@@ -19,8 +19,8 @@ function Navbar() {
             return name.slice(0,2)
       }
       
-      function handleLogout() {
-            logout();
+      async function handleLogout() {
+            await logout();
            
             window.location.href = '/login';
 
