@@ -2,7 +2,7 @@ import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const api = axios.create({
-  baseURL: 'https://brainseekapi.vercel.app/api',
+  baseURL: 'https://brainseekapi.onrender.com/api',
   withCredentials: true, // crucial for iOS Safari + cookies
   headers: {
     'Content-Type': 'application/json'

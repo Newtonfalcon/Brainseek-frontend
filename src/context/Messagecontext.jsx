@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const api = axios.create({
-  baseURL: 'https://brainseekapi.vercel.app/api',
+  baseURL: 'https://brainseekapi.onrender.com/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'

@@ -8,7 +8,7 @@ import { useParams } from "react-router";
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
-  baseURL: 'https://brainseekapi.vercel.app/api',  
+  baseURL: 'https://brainseekapi.onrender.com/api',  
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
