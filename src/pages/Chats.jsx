@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import axios from "axios";
-import { Menu, Copy, Send } from "lucide-react";
+import { Copy, Send } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useParams } from "react-router";
-import {v4 as uuidv4} from 'uuid';
-const thread_id = uuidv4();
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
@@ -22,42 +20,32 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [threadId, setThreadId] = useState(null); // ✅ Local state for chatId
+  const [threadId, setThreadId] = useState(null); // ✅ Get from database
   
   const chatEndRef = useRef(null);
+  const { id } = useParams();
 
-const {id} = useParams();
-
-    
+  // ✅ Fetch messages and thread_id when component mounts
   useEffect(() => {
-   
-
-    function fetchMessages() {
-      api.get(`/message/${id}`)
-        .then(res => {
-          if (res.data && res.data.length > 0) {
-             
-            
-             setMessages(res.data[0].messages);
-             setThreadId(res.data[0].thread_id);
-             
-              setPrevchatlength(res.data[0].messages.length);
-          }
-        })
-        .catch(err => {
-          console.error("Error fetching messages:", err);
-        });
+    async function fetchMessages() {
+      try {
+        const res = await api.get(`/message/${id}`);
+        
+        if (res.data && res.data.length > 0) {
+          const chatData = res.data[0];
+          setMessages(chatData.messages || []);
+          setThreadId(chatData.thread_id); // ✅ Use existing thread_id
+          setPrevchatlength(chatData.messages?.length || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      }
     }
 
-    
+    if (id) {
       fetchMessages();
-    
-  }, []);
-
-
-
-
- 
+    }
+  }, [id]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,41 +54,40 @@ const {id} = useParams();
   const copyText = (text) => navigator.clipboard.writeText(text);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !threadId) {
+      console.error("Missing input or threadId");
+      return;
+    }
     
     const userMsg = { role: "user", content: input };
-   
     setMessages((prev) => [...prev, userMsg]);
-    
-   
     setInput("");
     setLoading(true);
 
     try {
+      // ✅ Use the SAME thread_id from database
       const res = await api.post("/", {  
         prompt: input,
-        thread_id: threadId
+        thread_id: threadId // ✅ This maintains conversation memory
       });
 
-      
-      
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: res.data || "⚠️ No response received." },
-      ]);
+      const assistantMsg = { 
+        role: "assistant", 
+        content: res.data || "⚠️ No response received." 
+      };
 
+      setMessages((prev) => [...prev, assistantMsg]);
+
+      // ✅ Update messages in database
+      const updatedMessages = [...messages, userMsg, assistantMsg];
       
-      if (messages.length > prevchatlength) {
-        const saveRes = await api.patch("message", {
-          messages: [...messages, userMsg, { role: "assistant", content: res.data }],
-          thread_id,
+      if (updatedMessages.length > prevchatlength) {
+        await api.patch("/message", {
+          messages: updatedMessages,
+          thread_id: threadId,
           chatId: id
         });
-
-
       }
-     
-      
     } catch (err) {
       console.error("API Error:", err);
       setMessages((prev) => [
@@ -117,10 +104,8 @@ const {id} = useParams();
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-black overflow-x-hidden">
-      {/* HEADER */}
-      <Navbar/>
+      <Navbar />
 
-      {/* CHAT BODY */}
       <main className="flex-1 overflow-y-auto px-4 md:px-0">
         <div className="max-w-3xl mx-auto pt-20 pb-36 space-y-6">
           {messages.map((msg, i) => (
@@ -167,7 +152,6 @@ const {id} = useParams();
         </div>
       </main>
 
-      {/* FOOTER INPUT AREA */}
       <footer className="fixed bottom-0 w-full bg-white border-t border-gray-200 p-4 z-10">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-end gap-3 bg-gray-50 border border-gray-300 rounded-2xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-gray-400">
@@ -184,7 +168,7 @@ const {id} = useParams();
             />
             <button
               onClick={sendMessage}
-              disabled={loading}
+              disabled={loading || !threadId}
               className="p-2 rounded-lg bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 transition flex items-center justify-center"
             >
               <Send size={18} />
