@@ -1,100 +1,81 @@
-
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
-
 const api = axios.create({
   baseURL: 'https://brainseekapi.vercel.app/api',
-  withCredentials: true,
+  withCredentials: true, // crucial for iOS
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-export const Authcontext = createContext()
+export const Authcontext = createContext();
 
-export const AuthProvider = ({children})=> {
-  const [user, setUser] = useState(null)
-  const [status, setStatus] = useState(null)
-  const [error, setError] = useState("")
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [status, setStatus] = useState("pending"); // "pending" | "authenticated" | "not authenticated" | "error"
+  const [error, setError] = useState("");
 
-  useEffect(()=>{
+  // Fetch current user on mount
+  useEffect(() => {
     const getUser = async () => {
-      try { 
-        setStatus("pending")
-        const res = await api.get("/auth/user")  // ✅ Using api instance
-        setUser(res.data)
-        setStatus("success") 
-      } catch (error) {
-        setUser(null)
-        setError(error.response?.data?.message || error.message)
-        setStatus("not authenticated")
+      setStatus("pending");
+      try {
+        const res = await api.get("/auth/user");
+        setUser(res.data);
+        setStatus("authenticated");
+      } catch (err) {
+        setUser(null);
+        setError(err.response?.data?.message || err.message);
+        setStatus("not authenticated");
       }
-    }
-    getUser()
-  },[])
+    };
+    getUser();
+  }, []);
 
-  const register = async (name, email, password)=>{
-    setStatus("pending")
-    setError("")
+  const register = async (name, email, password) => {
+    setStatus("pending");
+    setError("");
     try {
-      setStatus("pending")
-
-      const res = await api.post('/auth/register', {
-        name, 
-        email, 
-        password
-      })
-      setUser(res.data)
-      setStatus("success")
-    } catch (error) {
-      setStatus("error")  // ✅ Should be string not error object
-      setError(error.response?.data?.error || error.message)
+      const res = await api.post('/auth/register', { name, email, password });
+      setUser(res.data);
+      setStatus("authenticated");
+    } catch (err) {
+      setStatus("error");
+      setError(err.response?.data?.error || err.message);
     }
-  }
+  };
 
-  const login = async (email, password)=>{
-    setError("")
-    setStatus("pending")
+  const login = async (email, password) => {
+    setStatus("pending");
+    setError("");
     try {
-      setError("")
-      setStatus("pending")
-      const res = await api.post('/auth/login', {
-        email, 
-        password
-      })
-
-      
-
-      setUser(res.data)
-      setStatus("success")
-    } catch (error) {
-      setStatus("failed to login")
-     const errorMsg = error.response?.data?.message 
-        || error.response?.data?.error 
-        || 'Login failed';
-      setError(errorMsg);
+      const res = await api.post('/auth/login', { email, password });
+      setUser(res.data);
+      setStatus("authenticated");
+    } catch (err) {
+      setStatus("error");
+      setError(err.response?.data?.message || err.response?.data?.error || 'Login failed');
     }
-  }
+  };
 
-  const logout = async ()=>{
-    
+  const logout = async () => {
     try {
-      await api.post('/auth/logout')
-      setUser(null)
-      setStatus("not authenticated")
-    } catch (error) {
-      setError(error.response?.data?.message || error.message)
+      await api.post('/auth/logout');
+      setUser(null);
+      setStatus("not authenticated");
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
     }
-  }
+  };
 
-  const value = {user, status, register, login, logout, error}
+  const value = { user, status, error, register, login, logout };
 
   return (
     <Authcontext.Provider value={value}>
       {children}
     </Authcontext.Provider>
-  )
-}
+  );
+};
 
-export const useAuth = ()=> useContext(Authcontext)
+export const useAuth = () => useContext(Authcontext);
