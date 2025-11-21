@@ -5,7 +5,7 @@ import {Link} from 'react-router';
 
 export default function HeroSection() {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 lg:px-32 py-10 w-full">
+    <section className="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 lg:px-32 py-10 w-full bg-black text-white">
       {/* LEFT SECTION */}
       <div className="max-w-xl z-10 text-center md:text-left space-y-6">
         {/* Logo */}

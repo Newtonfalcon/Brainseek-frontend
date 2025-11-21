@@ -27,7 +27,7 @@ export const AuthProvider = ({children})=> {
         setStatus("success") 
       } catch (error) {
         setUser(null)
-        //setError(error.response?.data?.message || error.message)
+        setError(error.response?.data?.message || error.message)
         setStatus("not authenticated")
       }
     }
