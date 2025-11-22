@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
     const getUser = async () => {
       try {
-        setStatus("pending");
+        //setStatus("pending");
         const res = await api.get("/auth/user");
         if (!ignore) {
           setUser(res.data);
