@@ -38,21 +38,16 @@ export const ChatProvider = ({children})=> {
       },[])
 
 
-  const createChat = async (title)=>{
-    try {
-      const res = await api.post('/chat', {
-        title
-      })
-
-
-
-      setCurrentId(res?.data._id)
-      
-
-    } catch (error) {
-      throw new Error(error.response?.data?.message || error.message)
-    }
+  const createChat = async (title) => {
+  try {
+    const res = await api.post('/chat', { title });
+    const newId = res?.data._id;
+    setCurrentId(newId);
+    return newId; // ✅ Return the ID
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
   }
+}
 
 
   return (

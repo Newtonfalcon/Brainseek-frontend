@@ -25,27 +25,34 @@ export default function ChatPage() {
   const chatEndRef = useRef(null);
   const { id } = useParams();
 
-  // ✅ Fetch messages and thread_id when component mounts
-  useEffect(() => {
-    async function fetchMessages() {
-      try {
-        const res = await api.get(`/message/${id}`);
-        
-        if (res.data && res.data.length > 0) {
-          const chatData = res.data[0];
-          setMessages(chatData.messages || []);
-          setThreadId(chatData.thread_id); // ✅ Use existing thread_id
-          setPrevchatlength(chatData.messages?.length || 0);
-        }
-      } catch (err) {
+useEffect(() => {
+  let isMounted = true;
+  
+  async function fetchMessages() {
+    try {
+      const res = await api.get(`/message/${id}`);
+      
+      if (isMounted && res.data && res.data.length > 0) {
+        const chatData = res.data[0];
+        setMessages(chatData.messages || []);
+        setThreadId(chatData.thread_id);
+        setPrevchatlength(chatData.messages?.length || 0);
+      }
+    } catch (err) {
+      if (isMounted) {
         console.error("Error fetching messages:", err);
       }
     }
+  }
 
-    if (id) {
-      fetchMessages();
-    }
-  }, [id]);
+  if (id) {
+    fetchMessages();
+  }
+  
+  return () => {
+    isMounted = false; // Cleanup
+  };
+}, [id]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -6,8 +6,7 @@ import { Menu, Copy, Send } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useChat } from "../context/Chatcontext";
 import { v4 as uuidv4 } from 'uuid';
-
-const thread_id = uuidv4();
+const [thread_id] = useState(() => uuidv4()); // ✅ Only generate onceconst thread_id = uuidv4();
 
 // ✅ Create axios instance with credentials
 const api = axios.create({
@@ -40,75 +39,60 @@ export default function ChatPage() {
 
   const copyText = (text) => navigator.clipboard.writeText(text);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    
-    const userMsg = { role: "user", content: input };
-   
-    setMessages((prev) => [...prev, userMsg]);
-    
-    
-    if (messages.length == 0) {
-      const title = input.slice(0, 30) || "New Chat";
-      await createChat(title);
+ const sendMessage = async () => {
+  if (!input.trim()) return;
+  
+  const userMsg = { role: "user", content: input };
+  const newMessages = [...messages, userMsg];
+  setMessages(newMessages);
+  
+  // Create chat first if needed
+ let activeChatId = chatId || currentId;
+if (!activeChatId && messages.length === 0) {
+  const title = input.slice(0, 30) || "New Chat";
+  activeChatId = await createChat(title); // ✅ Get ID immediately
+  setChatId(activeChatId);
+}
+  
+  setInput("");
+  setLoading(true);
 
-    }
+  try {
+    const res = await api.post("/", {  
+      prompt: input,
+      thread_id
+    });
 
-    setInput("");
-    setLoading(true);
+    const assistantMsg = { role: "assistant", content: res.data || "⚠️ No response received." };
+    const updatedMessages = [...newMessages, assistantMsg];
+    setMessages(updatedMessages);
 
-    try {
-      const res = await api.post("/", {  
-        prompt: input,
-        thread_id
-      });
-
-
-      
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: res.data || "⚠️ No response received." },
-      ]);
-
-      // ✅ Save messages AFTER getting response
-      if (messages.length > 0) {
-        // ✅ Use the chatId from state or currentId
-        const activeChatId = chatId || currentId;
-        
-        if (!activeChatId) {
-          console.error("❌ No chatId available!");
-          return;
-        }
-
-        if (messages.length <= 2) {
-          const saveRes = await api.post("/message", {
-            messages: [...messages, userMsg, { role: "assistant", content: res.data }],
-            thread_id,
-            chatId: activeChatId
-          });
-
-        } else {
-          const updateRes = await api.patch("/message", {
-            messages: [...messages, userMsg, { role: "assistant", content: res.data }],
-            thread_id,
-            chatId: activeChatId
-          });
-
-        }
+    // Save messages with the active chat ID
+    if (activeChatId) {
+      if (updatedMessages.length <= 2) {
+        await api.post("/message", {
+          messages: updatedMessages,
+          thread_id,
+          chatId: activeChatId
+        });
+      } else {
+        await api.patch("/message", {
+          messages: updatedMessages,
+          thread_id,
+          chatId: activeChatId
+        });
       }
-    } catch (err) {
-      console.error("API Error:", err);
-      setMessages((prev) => [
-        ...prev,
-        { 
-          role: "assistant", 
-          content: err.response?.data?.error || "❌ Internal server error." 
-        },
-      ]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error("API Error:", err);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: err.response?.data?.error || "❌ Internal server error." }
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-black overflow-x-hidden">

@@ -36,28 +36,13 @@ export default function RegisterPage() {
       alert(error)
     }
   }
-useEffect(()=>{
-
-
-function nav(){
-  if (status === "pending"){
-  return (
-    <NebulaLoader />
-  )
-}
-
-if(user){
+useEffect(() => {
+  if (status === "pending") return;
   
-    router("/message")
+  if (user) {
+    router("/message", { replace: true });
   }
-
-  
-}
-
-nav()
-
-},[status])
-
+}, [status, user, router]); 
 
 
   return (
