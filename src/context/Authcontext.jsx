@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       } catch (err) {
         if (!ignore) {
           setUser(null);
-          setError(err.response?.data?.message || err.message);
+          //setError(err.response?.data?.message || err.message);
           setStatus("not authenticated");
         }
       }

@@ -33,7 +33,7 @@ export default function ChatPage() {
     }
   }, [currentId]);
 
-  console.log("thread id:", thread_id);
+  
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
